@@ -53,29 +53,29 @@ else:
 
     fname = ''
 
-if args.o is None:
-#gets the filename from the url
-    if "Content-Disposition" in request.headers.keys():
-        fname = re.findall("filename=(.+)", request.headers["Content-Disposition"])[0]
+    if args.o is None:
+    #gets the filename from the url
+        if "Content-Disposition" in request.headers.keys():
+            fname = re.findall("filename=(.+)", request.headers["Content-Disposition"])[0]
+        else:
+            fname = url.split("/")[-1]
+
+    #sets filename to o argument
     else:
-        fname = url.split("/")[-1]
+        fname = args.o
 
-#sets filename to o argument
-else:
-    fname = args.o
+    #writes to the file
+    with open(fname, "wb") as f:
+        #variable for curent amount of bytes downloaded
+        bytes_downloaded = 0
+        #downloads the file in chunks
+        for chunk in request.iter_content(chunk_size=1000000):
+            bytes_downloaded += len(chunk)
+            f.write(chunk)
+            #download progress and progress bar
+            done = int(50 * bytes_downloaded / length)
+            sys.stdout.write("\r\033[K[%s%s]" % ('=' * done, ' ' * (50-done)) + convert_bytes(bytes_downloaded) + "/" + convert_bytes(length))
+            sys.stdout.flush()
 
-#writes to the file
-with open(fname, "wb") as f:
-    #variable for curent amount of bytes downloaded
-    bytes_downloaded = 0
-    #downloads the file in chunks
-    for chunk in request.iter_content(chunk_size=1000000):
-        bytes_downloaded += len(chunk)
-        f.write(chunk)
-        #download progress and progress bar
-        done = int(50 * bytes_downloaded / length)
-        sys.stdout.write("\r\033[K[%s%s]" % ('=' * done, ' ' * (50-done)) + convert_bytes(bytes_downloaded) + "/" + convert_bytes(length))
-        sys.stdout.flush()
-
-print ("")
-logger.info("Sucessfully downloaded: %s." % (fname))
+    print ("")
+    logger.info("Sucessfully downloaded: %s." % (fname))
