@@ -11,3 +11,7 @@ It features:
 - Download complete message!
 
 It is truly the pinnacle of software development!
+
+## Usage
+
+```./billy.py <url>```
